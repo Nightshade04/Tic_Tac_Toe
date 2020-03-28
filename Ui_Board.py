@@ -40,7 +40,7 @@ def pre_process():
     return [x_img, o_img]
 
 
-def game_over(param):
+def game_over(param, comb):
     global game_over_flag
     game_over_flag = True
 
@@ -48,6 +48,11 @@ def game_over(param):
         end_data['message'] = '================== Game Tied, No-one Wins =================='
 
     else:
+        print(comb, "From here")
+        for button_value in comb:
+            index = magic_matrix.index(button_value)
+            buttons['button' + str(index)].config(background='green')
+
         end_data['message'] = '================== Congratulations, ' + param + ' Wins =================='
 
 
@@ -77,15 +82,15 @@ def check_winner():
                     buttons[button]['state'] = tk.DISABLED
 
             print("First Player Wins")
-            game_over('FirstPlayer')
+            game_over('FirstPlayer', comb)
 
         elif second_player_win_flag:
             for button in buttons:
                 if buttons[button]['state'] is not tk.DISABLED:
                     buttons[button]['state'] = tk.DISABLED
 
-            print('Second PLayer wins')
-            game_over('SecondPlayer')
+            print('Second PLayer wins', comb)
+            game_over('SecondPlayer', comb)
 
         else:
             print('DRAW')
