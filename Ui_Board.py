@@ -24,7 +24,18 @@ second_player_moves = []
 first_player_win_flag = False
 second_player_win_flag = False
 game_over_flag = False
-end_data = {}
+end_data = None
+
+
+def popup(msg):
+    popup = tk.Tk()
+    popup.wm_title('!!!')
+    label = tk.Label(popup, text=msg)
+    label.pack(side="top", fill='x', expand=True)
+    button = tk.Button(popup, text='Okay', command=popup.destroy)
+    button.pack()
+    # popup.after(3000, lambda: popup.destroy())
+    popup.mainloop()
 
 
 def pre_process():
@@ -40,12 +51,12 @@ def pre_process():
     return [x_img, o_img]
 
 
-def game_over(param, comb):
-    global game_over_flag
+def game_over(param, comb=None):
+    global game_over_flag, end_data
     game_over_flag = True
 
     if param == 'Tie':
-        end_data['message'] = '================== Game Tied, No-one Wins =================='
+        end_data = '================== Game Tied, No-one Wins =================='
 
     else:
         print(comb, "From here")
@@ -53,44 +64,46 @@ def game_over(param, comb):
             index = magic_matrix.index(button_value)
             buttons['button' + str(index)].config(background='green')
 
-        end_data['message'] = '================== Congratulations, ' + param + ' Wins =================='
+        end_data = '================== Congratulations, ' + param + ' Wins =================='
+
+    popup(end_data)
 
 
 def check_winner():
     global turn_multiplayer, first_player_moves, second_player_moves, first_player_win_flag, second_player_win_flag
 
-    for comb in combinations(first_player_moves, 3):
-        if sum(comb) == 15:
+    for comb_x in combinations(first_player_moves, 3):
+        if sum(comb_x) == 15:
             first_player_win_flag = True
+            print(comb_x, "X COMB")
             break
-        # print(comb, "X COMB")
 
-    for comb in combinations(second_player_moves, 3):
-        if sum(comb) == 15:
+    for comb_o in combinations(second_player_moves, 3):
+        if sum(comb_o) == 15:
             second_player_win_flag = True
+            print(comb_o, "O COMB")
             break
-        # print(comb, "O COMB")
 
     if first_player_win_flag or second_player_win_flag:
-        turn_multiplayer = 8
-    print(not first_player_win_flag)
-    if turn_multiplayer == 8:
+        turn_multiplayer = 9
+
+    if turn_multiplayer == 9:
 
         if first_player_win_flag:
             for button in buttons:
                 if buttons[button]['state'] is not tk.DISABLED:
                     buttons[button]['state'] = tk.DISABLED
 
-            print("First Player Wins")
-            game_over('FirstPlayer', comb)
+            print("First Player Wins", comb_x)
+            game_over('FirstPlayer', comb_x)
 
         elif second_player_win_flag:
             for button in buttons:
                 if buttons[button]['state'] is not tk.DISABLED:
                     buttons[button]['state'] = tk.DISABLED
 
-            print('Second PLayer wins', comb)
-            game_over('SecondPlayer', comb)
+            print('Second PLayer wins', comb_o)
+            game_over('SecondPlayer', comb_o)
 
         else:
             print('DRAW')
@@ -121,6 +134,7 @@ def button_press_callback(button_data):
     pressed_button = button_data[0]
 
     if game_type == 'OnePlayer':
+        popup("Logic coming soon")
         print('LOGIC COMING SOON')
 
     else:
@@ -130,16 +144,20 @@ def button_press_callback(button_data):
 
 
 class UiBoard(tk.Frame):
+    button_marks = None
 
     def __init__(self, *args, **kwargs):
+        global end_data
         # print(args)
         self.game_type = None
         tk.Frame.__init__(self, args[0], bg='black')
 
-        button_marks = pre_process()
+        UiBoard.button_marks = pre_process()
         stack = inspect.stack()
         the_class = stack[1][0].f_locals["self"].__class__.__name__
         self.game_type = the_class
+
+        end_data = 'This is' + str(self.game_type) + ' Mode!!!'
         # print(self.game_type)
 
         for button in buttons:
@@ -147,13 +165,36 @@ class UiBoard(tk.Frame):
             row = int(i / 3)
             col = i % 3
             buttons[button] = tk.Button(self, text='-', relief=tk.GROOVE, height=8, width=23)
-            buttons[button].config(
-                command=lambda
-                    data=[buttons[button], button_marks, self.game_type, magic_matrix[i]]: button_press_callback(
-                    data))
+            buttons[button].config(command=lambda
+                data=[buttons[button], UiBoard.button_marks, self.game_type, magic_matrix[i]]: button_press_callback(
+                data))
             buttons[button].grid(row=row, column=col, sticky="nsew")
             buttons[button].grid_rowconfigure(row, weight=0)
             buttons[button].grid_columnconfigure(col, weight=0)
+
+    def reset_board(self):
+        global turn_multiplayer, first_player_moves, second_player_moves, first_player_win_flag, second_player_win_flag, game_over_flag, end_data
+
+        turn_multiplayer = 0
+        first_player_moves = []
+        second_player_moves = []
+        first_player_win_flag = False
+        second_player_win_flag = False
+        game_over_flag = False
+        end_data = None
+
+        for button in buttons:
+            i = int(button[len(button) - 1])
+            row = int(i / 3)
+            col = i % 3
+            buttons[button] = tk.Button(self, text='-', relief=tk.GROOVE, height=8, width=23)
+            buttons[button].config(command=lambda
+                data=[buttons[button], UiBoard.button_marks, self.game_type, magic_matrix[i]]: button_press_callback(
+                data))
+            buttons[button].grid(row=row, column=col, sticky="nsew")
+            buttons[button].grid_rowconfigure(row, weight=0)
+            buttons[button].grid_columnconfigure(col, weight=0)
+        pass
 
 # app = UiBoard(root)
 # app.pack()

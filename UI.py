@@ -38,8 +38,6 @@ class TicTacToeUI(tk.Tk):
 
 class StartPage(tk.Frame):
 
-    # TODO 1: put an image and other things to be seen in the homepage, Basically the menu
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg='black')
         self.controller = controller
@@ -109,14 +107,21 @@ class OnePlayer(tk.Frame):
         frame.pack(fill=tk.BOTH, expand=1)
         frame.controller = controller
         frame.pack()
-        button = tk.Button(self, text="Go to the start page",
+        label = tk.Label(self, text="This is 1 Player Mode!!!", font=controller.title_font)
+        label.pack(side="top", fill="x", pady=22, expand=True)
+        button = tk.Button(self, text="Go Back",
                            command=lambda: controller.show_frame("MenuPage"))
-        button.pack()
+        button3 = tk.Button(self, text='Reset Board', command=lambda: reset_board(frame))
+
+        button3.pack(side='left', fill='both', expand=True)
+        button.pack(side='left', fill='both', expand=True)
+
+
+def reset_board(frame):
+    frame.reset_board()
 
 
 class TwoPlayer(tk.Frame):
-
-    # TODO 5: Call the multiplayer Logic here.
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -126,11 +131,15 @@ class TwoPlayer(tk.Frame):
         frame.pack(fill=tk.BOTH, expand=1)
         frame.controller = controller
         frame.pack()
-        label = tk.Label(self, text="This is page 2", font=controller.title_font)
-        label.pack(side="top", fill="x", pady=10)
-        button = tk.Button(self, text="Go to the start page",
+        label = tk.Label(self, text="This is 2 Player Mode!!!", font=controller.title_font)
+        label.pack(side="top", fill="both", expand=True, pady=22)
+
+        button = tk.Button(self, text="Go Back",
                            command=lambda: controller.show_frame("MenuPage"))
-        button.pack()
+        button3 = tk.Button(self, text='Reset Board', command=lambda: reset_board(frame))
+
+        button3.pack(side='left', fill='both', expand=True)
+        button.pack(side='left', fill='both', expand=True)
 
 
 if __name__ == "__main__":
