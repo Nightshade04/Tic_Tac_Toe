@@ -3,7 +3,8 @@ from tkinter import font
 
 from PIL import ImageTk, Image
 
-from Ui_Board import UiBoard
+from One_Player_Ui_Board import OnePlayerUiBoard
+from Two_player_Ui_Board import TwoPlayerUiBoard
 
 
 class TicTacToeUI(tk.Tk):
@@ -20,6 +21,7 @@ class TicTacToeUI(tk.Tk):
         container.pack(side="bottom", fill="both", expand=True)
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
+        container.grid_propagate(False)
 
         self.frames = {}
         for F in (StartPage, MenuPage, OnePlayer, TwoPlayer):
@@ -27,6 +29,8 @@ class TicTacToeUI(tk.Tk):
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
             frame.grid(row=0, column=0, sticky="nsew")
+            frame.grid_rowconfigure(0, weight=1)
+            frame.grid_columnconfigure(0, weight=1)
 
         self.show_frame("StartPage")
 
@@ -84,9 +88,9 @@ class MenuPage(tk.Frame):
         label = tk.Label(self, text="Welcome", bg='black', fg='white', font=controller.title_font)
         label.pack(side="top", fill="x", pady=10)
 
-        button1 = tk.Button(self, text="Go to Page One",
+        button1 = tk.Button(self, text="One Player Game",
                             command=lambda: controller.show_frame("OnePlayer"))
-        button2 = tk.Button(self, text="Go to Page Two",
+        button2 = tk.Button(self, text="Two Player Game",
                             command=lambda: controller.show_frame("TwoPlayer"))
         button = tk.Button(self, text="Go to the start page",
                            command=lambda: controller.show_frame("StartPage"))
@@ -97,20 +101,18 @@ class MenuPage(tk.Frame):
 
 class OnePlayer(tk.Frame):
 
-    # TODO 3: Call the AI script to make it work and render the UI for game here.
-
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         print(parent, "From here")
-        frame = UiBoard(self, parent)
-        frame.pack_propagate(0)
+        frame = OnePlayerUiBoard(self, parent)
         frame.pack(fill=tk.BOTH, expand=1)
         frame.controller = controller
         frame.pack()
+        frame.pack_propagate(False)
         label = tk.Label(self, text="This is 1 Player Mode!!!", font=controller.title_font)
         label.pack(side="top", fill="x", pady=22, expand=True)
         button = tk.Button(self, text="Go Back",
-                           command=lambda: controller.show_frame("MenuPage"))
+                           command=lambda: [reset_board(frame), controller.show_frame("MenuPage")])
         button3 = tk.Button(self, text='Reset Board', command=lambda: reset_board(frame))
 
         button3.pack(side='left', fill='both', expand=True)
@@ -126,7 +128,7 @@ class TwoPlayer(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         print(parent, "From here")
-        frame = UiBoard(self, parent)
+        frame = TwoPlayerUiBoard(self, parent)
         frame.pack_propagate(0)
         frame.pack(fill=tk.BOTH, expand=1)
         frame.controller = controller
@@ -135,7 +137,7 @@ class TwoPlayer(tk.Frame):
         label.pack(side="top", fill="both", expand=True, pady=22)
 
         button = tk.Button(self, text="Go Back",
-                           command=lambda: controller.show_frame("MenuPage"))
+                           command=lambda: [reset_board(frame), controller.show_frame("MenuPage")])
         button3 = tk.Button(self, text='Reset Board', command=lambda: reset_board(frame))
 
         button3.pack(side='left', fill='both', expand=True)

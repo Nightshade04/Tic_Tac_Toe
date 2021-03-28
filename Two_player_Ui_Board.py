@@ -26,6 +26,10 @@ second_player_win_flag = False
 game_over_flag = False
 end_data = None
 
+'''
+# necessary code for pre-processing images and other commonly used methods 
+'''
+
 
 def popup(msg):
     popup = tk.Tk()
@@ -96,6 +100,7 @@ def check_winner():
 
             print("First Player Wins", comb_x)
             game_over('FirstPlayer', comb_x)
+            return 'FirstPlayer'
 
         elif second_player_win_flag:
             for button in buttons:
@@ -104,28 +109,14 @@ def check_winner():
 
             print('Second PLayer wins', comb_o)
             game_over('SecondPlayer', comb_o)
+            return 'SecondPlayer'
 
         else:
             print('DRAW')
             game_over('Tie')
-
-
-def multiplayer_move(pressed_button, button_value, param):
-    global turn_multiplayer, first_player_moves, second_player_moves
-    # check_winner()
-    pressed_button['state'] = tk.DISABLED
-
-    if turn_multiplayer % 2 == 0:
-        pressed_button.config(image=param[0], height=125, width=166)
-        first_player_moves.append(button_value)
-
+            return 'Tie'
     else:
-        pressed_button.config(image=param[1], height=125, width=166)
-        second_player_moves.append(button_value)
-
-    turn_multiplayer += 1
-    check_winner()
-    print(first_player_moves, second_player_moves)
+        return None
 
 
 def button_press_callback(button_data):
@@ -133,17 +124,40 @@ def button_press_callback(button_data):
     button_value = button_data[3]
     pressed_button = button_data[0]
 
-    if game_type == 'OnePlayer':
-        popup("Logic coming soon")
-        print('LOGIC COMING SOON')
+    multiplayer_move(pressed_button, button_value, button_data[1])
+
+
+# print(button_data)
+
+
+'''
+# Method that governs multiplayer moves in the game
+'''
+
+
+def multiplayer_move(pressed_button, button_value, button_images):
+    global turn_multiplayer, first_player_moves, second_player_moves
+    # check_winner()
+
+    print("Current state of button", type(pressed_button['state']))
+    pressed_button['state'] = tk.DISABLED
+
+    if turn_multiplayer % 2 == 0:
+        pressed_button.config(image=button_images[0], height=125, width=166)
+        first_player_moves.append(button_value)
 
     else:
-        multiplayer_move(pressed_button, button_value, button_data[1])
+        pressed_button.config(image=button_images[1], height=125, width=166)
+        second_player_moves.append(button_value)
 
-    # print(button_data)
+    turn_multiplayer += 1
+    check_winner()
+    print(first_player_moves, second_player_moves)
 
 
-class UiBoard(tk.Frame):
+# Class for enabling use of this board in other places
+class TwoPlayerUiBoard(tk.Frame):
+    global buttons
     button_marks = None
 
     def __init__(self, *args, **kwargs):
@@ -152,7 +166,7 @@ class UiBoard(tk.Frame):
         self.game_type = None
         tk.Frame.__init__(self, args[0], bg='black')
 
-        UiBoard.button_marks = pre_process()
+        TwoPlayerUiBoard.button_marks = pre_process()
         stack = inspect.stack()
         the_class = stack[1][0].f_locals["self"].__class__.__name__
         self.game_type = the_class
@@ -166,7 +180,8 @@ class UiBoard(tk.Frame):
             col = i % 3
             buttons[button] = tk.Button(self, text='-', relief=tk.GROOVE, height=8, width=23)
             buttons[button].config(command=lambda
-                data=[buttons[button], UiBoard.button_marks, self.game_type, magic_matrix[i]]: button_press_callback(
+                data=[buttons[button], TwoPlayerUiBoard.button_marks, self.game_type,
+                      magic_matrix[i]]: button_press_callback(
                 data))
             buttons[button].grid(row=row, column=col, sticky="nsew")
             buttons[button].grid_rowconfigure(row, weight=0)
@@ -184,12 +199,16 @@ class UiBoard(tk.Frame):
         end_data = None
 
         for button in buttons:
+            print(button + " " + buttons[button]['state'] + " " + buttons[button]['image'])
+
+        for button in buttons:
             i = int(button[len(button) - 1])
             row = int(i / 3)
             col = i % 3
             buttons[button] = tk.Button(self, text='-', relief=tk.GROOVE, height=8, width=23)
             buttons[button].config(command=lambda
-                data=[buttons[button], UiBoard.button_marks, self.game_type, magic_matrix[i]]: button_press_callback(
+                data=[buttons[button], TwoPlayerUiBoard.button_marks, self.game_type,
+                      magic_matrix[i]]: button_press_callback(
                 data))
             buttons[button].grid(row=row, column=col, sticky="nsew")
             buttons[button].grid_rowconfigure(row, weight=0)
