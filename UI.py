@@ -117,6 +117,8 @@ class OnePlayer(tk.Frame):
 
         button3.pack(side='left', fill='both', expand=True)
         button.pack(side='left', fill='both', expand=True)
+        for _ in range(0, 8):
+            reset_board(frame)
 
 
 def reset_board(frame):

@@ -18,6 +18,19 @@ buttons = {
     'button7': None,
     'button8': None
 }
+
+board = {
+    '0': 'Normal',
+    '1': 'Normal',
+    '2': 'Normal',
+    '3': 'Normal',
+    '4': 'Normal',
+    '5': 'Normal',
+    '6': 'Normal',
+    '7': 'Normal',
+    '8': 'Normal'
+}
+
 magic_matrix = [8, 1, 6, 3, 5, 7, 4, 9, 2]
 turn_multiplayer = 0
 first_player_moves = []
@@ -146,8 +159,8 @@ def check_winner_minimax(first_player_moves_local, second_player_moves_local):
         return 'SecondPlayer'
 
     else:
-        for button in buttons:
-            if buttons[button]['state'] == tk.NORMAL:
+        for button in board:
+            if board[button] == 'Normal':
                 game_continue_flag = True
 
         if game_continue_flag is True:
@@ -239,8 +252,7 @@ def button_press_callback(button_data):
 #
 #     return (minv, qx, qy)
 
-
-def minimax(depth, maximizing_player, button_images, first_player_moves_local, second_player_moves_local, board):
+def minimax(depth, maximizing_player, first_player_moves_local, second_player_moves_local, local_board):
     base_condition_check_value = check_winner_minimax(first_player_moves_local, second_player_moves_local)
 
     if base_condition_check_value is not None:
@@ -249,15 +261,13 @@ def minimax(depth, maximizing_player, button_images, first_player_moves_local, s
     else:
         if maximizing_player is False:
             best_score = math.inf
-            for button in board:
-                if board[button]['state'] == tk.NORMAL:
-                    board[button].config(image=button_images[1], height=8, width=23)
-                    board[button]['state'] = tk.DISABLED
-                    second_player_moves_local.append(magic_matrix[int(button[-1])])
-                    current_score = minimax(depth + 1, True, button_images, first_player_moves_local,
-                                            second_player_moves_local, board)
-                    board[button]['state'] = tk.NORMAL
-                    board[button].config(image='', text='-', height=8, width=23)
+            for button in local_board:
+                if local_board[button] == 'Normal':
+                    local_board[button] = 'Disabled'
+                    second_player_moves_local.append(magic_matrix[int(button)])
+                    current_score = minimax(depth + 1, True, first_player_moves_local, second_player_moves_local,
+                                            local_board)
+                    local_board[button] = 'Normal'
                     second_player_moves_local.pop()
                     if current_score < best_score:
                         best_score = current_score
@@ -265,46 +275,40 @@ def minimax(depth, maximizing_player, button_images, first_player_moves_local, s
 
         else:
             best_score = -math.inf
-            for button in board:
-                if board[button]['state'] == tk.NORMAL:
-                    board[button].config(image=button_images[0], height=8, width=23)
-                    board[button]['state'] = tk.DISABLED
-                    first_player_moves_local.append(magic_matrix[int(button[-1])])
-                    current_score = minimax(depth + 1, False, button_images, first_player_moves_local,
-                                            second_player_moves_local, board)
-                    board[button]['state'] = tk.NORMAL
-                    board[button].config(image='', text='-', height=8, width=23)
+            for button in local_board:
+                if local_board[button] == 'Normal':
+                    board[button] = 'Disabled'
+                    first_player_moves_local.append(magic_matrix[int(button)])
+                    current_score = minimax(depth + 1, False, first_player_moves_local, second_player_moves_local,
+                                            local_board)
+                    local_board[button] = 'Normal'
                     first_player_moves_local.pop()
                     if current_score > best_score:
                         best_score = current_score
             return best_score
 
 
-def ai_move(button_images, first_player_moves_local, second_player_moves_local):
+def ai_move(first_player_moves_local, second_player_moves_local):
     global magic_matrix
 
     button_to_be_pressed = None
     button_pos_in_magic_matrix = -1
     best_score = math.inf
-    # buttons_local = None
-    # buttons_local = buttons
 
-    for button in buttons:
-        if buttons[button]['state'] == tk.NORMAL:
-            buttons[button].config(image=button_images[1], height=8, width=23)
-            buttons[button]['state'] = tk.DISABLED
-            second_player_moves_local.append(magic_matrix[int(button[-1])])
-            current_score = minimax(0, True, button_images, first_player_moves_local, second_player_moves_local,
-                                    buttons)
-            buttons[button]['state'] = tk.NORMAL
-            buttons[button].config(image='', text='-', height=8, width=23)
+    for button in board:
+        print(button, board[button], "From here")
+        if board[button] == 'Normal':
+            board[button] = 'Disabled'
+            second_player_moves_local.append(magic_matrix[int(button)])
+            current_score = minimax(0, True, first_player_moves_local, second_player_moves_local, board)
+            board[button] = 'Normal'
             second_player_moves_local.pop()
             if current_score < best_score:
                 best_score = current_score
-                button_to_be_pressed = buttons[button]
-                button_pos_in_magic_matrix = int(button[-1])
+                button_to_be_pressed = buttons['button' + str(button)]
+                button_pos_in_magic_matrix = int(button)
 
-    print(best_score)
+    print(best_score, first_player_moves_local, second_player_moves_local, "This is what computer chose")
     return [button_to_be_pressed, button_pos_in_magic_matrix]
 
 
@@ -314,6 +318,7 @@ def single_player_move(pressed_button, button_value, button_images):
     pressed_button['state'] = tk.DISABLED
     pressed_button.config(image=button_images[0], height=8, width=23)
     first_player_moves.append(button_value)
+    board[str(magic_matrix.index(button_value))] = 'Disabled'
     turn_multiplayer += 1
     # user_pressed_buttons.append(pressed_button)
 
@@ -325,13 +330,14 @@ def single_player_move(pressed_button, button_value, button_images):
 
     # Start looking for moves of computer player
 
-    ai_pressed_button_data = ai_move(button_images, first_player_moves, second_player_moves)
+    ai_pressed_button_data = ai_move(first_player_moves, second_player_moves)
     ai_pressed_button = ai_pressed_button_data[0]
     ai_pressed_button_value = magic_matrix[ai_pressed_button_data[1]]
 
     if ai_pressed_button is not None and ai_pressed_button_data[1] != -1:
         ai_pressed_button['state'] = tk.DISABLED
         ai_pressed_button.config(image=button_images[1], height=8, width=23)
+        board[str(ai_pressed_button_data[1])] = 'Disabled'
         second_player_moves.append(ai_pressed_button_value)
         # ai_pressed_buttons.append(ai_pressed_button)
 
@@ -377,8 +383,8 @@ class OnePlayerUiBoard(tk.Frame):
                       magic_matrix[i]]: button_press_callback(
                 data))
             buttons[button].grid(row=row, column=col, sticky="nsew")
-            buttons[button].grid_rowconfigure(row, weight=0)
-            buttons[button].grid_columnconfigure(col, weight=0)
+            buttons[button].grid_rowconfigure(row, weight=row)
+            buttons[button].grid_columnconfigure(col, weight=col)
 
     def reset_board(self):
         global turn_multiplayer, first_player_moves, second_player_moves, first_player_win_flag, second_player_win_flag, game_over_flag, end_data
@@ -390,6 +396,9 @@ class OnePlayerUiBoard(tk.Frame):
         second_player_win_flag = False
         game_over_flag = False
         end_data = None
+
+        for button in board:
+            board[button] = 'Normal'
 
         for button in buttons:
             i = int(button[len(button) - 1])
