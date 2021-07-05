@@ -5,3 +5,5 @@ Implemented the two player as well as a single player mode.
 AI implemented using MINIMAX algorithm.
 
 Open for alpha testing.
+
+For Testing, Just download .7z file, unpack it at your system and run the .exe.
