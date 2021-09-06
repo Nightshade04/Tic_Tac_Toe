@@ -55,6 +55,7 @@ scores = {
 def popup(msg):
     popup_dialog = tk.Tk()
     popup_dialog.wm_title('!!!')
+    # label = tk.Label(popup_dialog, text=msg, font='Helvetica 18 bold')
     label = tk.Label(popup_dialog, text=msg)
     label.pack(side="top", fill='x', expand=True)
     button = tk.Button(popup_dialog, text='Okay', command=popup_dialog.destroy)
